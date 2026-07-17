@@ -1,0 +1,40 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "guidr",
+  // Custom entry: re-exports the OpenNext handler + the ScanRunner Durable
+  // Object (background-surviving scans). See workers/entry.mjs.
+  "main": "workers/entry.mjs",
+  "compatibility_date": "2026-07-07",
+  "compatibility_flags": ["nodejs_compat"],
+  "durable_objects": {
+    "bindings": [{ "name": "SCAN_RUNNER", "class_name": "ScanRunner" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["ScanRunner"] }],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  // Deploys overwrite dashboard-set routes/vars with this file's contents.
+  // Pin the custom domain and preserve plain-text vars set in the dashboard
+  // (secrets are never touched by deploys).
+  "routes": [{ "pattern": "guidr.my", "custom_domain": true }],
+  // Crons dispatch on the schedule string in entry.mjs `scheduled`:
+  //  - "0 1 * * 1"  Guardian weekly digest, Monday 01:00 UTC = 09:00 MYT.
+  //  - "0 12 * * *" Daily protection reminder, 12:00 UTC = 20:00 MYT.
+  "triggers": { "crons": ["0 1 * * 1", "0 12 * * *"] },
+  "keep_vars": true,
+  "vars": {
+    // Durable scans now run in the ScanRunner Durable Object (no 30s
+    // waitUntil cap). Explicit "false" so a stale dashboard copy of this var
+    // can't silently disable them (keep_vars preserves dashboard vars).
+    // Flip to "true" to force every client onto the SSE streaming fallback.
+    "SCAN_DURABLE_DISABLED": "false",
+    // Vertex project gmp-demo-project-523521543 has billing disabled (trial
+    // credits exhausted) — use the Gemini API via GEMINI_API_KEY until a
+    // billing-enabled Vertex project exists. Remove to switch back.
+    "GUIDR_AI_BACKEND": "gemini-api"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

@@ -1,0 +1,61 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+firestore-debug.log
+firebase-debug*.log
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# cloudflare / opennext
+.open-next/
+.wrangler/
+.dev.vars
+cloudflare-env.d.ts
+
+# Google Cloud Credentials
+google-credentials.json
+# Firebase Admin service-account key (Guardian Alerts push)
+firebase-admin-credentials.json
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+.vercel
+
+# browser extension build output (node extension/build.mjs)
+extension/dist
+
+
+ADMIN_DASHBOARD_PROMPT.md

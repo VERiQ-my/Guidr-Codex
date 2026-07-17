@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Guidr</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        width: 300px; margin: 0; padding: 18px;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        background: #fff; color: #0b1020;
+      }
+      h1 { font-size: 15px; margin: 0 0 2px; }
+      .sub { font-size: 12px; color: #8b93a8; margin: 0 0 16px; }
+      .stats { display: flex; gap: 10px; margin-bottom: 16px; }
+      .stat {
+        flex: 1; background: #f4f6fa; border-radius: 10px;
+        padding: 10px 12px;
+      }
+      .stat b { display: block; font-size: 20px; line-height: 1.2; }
+      .stat span { font-size: 11px; color: #8b93a8; }
+      .privacy {
+        background: #eefaf2; border: 1px solid #cceedd; color: #14563a;
+        border-radius: 10px; padding: 10px 12px; margin-bottom: 16px;
+        font-size: 12px; line-height: 1.5;
+      }
+      .privacy b { display: block; margin-bottom: 3px; }
+      .row {
+        display: flex; align-items: center; justify-content: space-between;
+        font-size: 13px; padding: 9px 0;
+        border-top: 1px solid #eef0f5;
+      }
+      button {
+        font: inherit; font-size: 12px; font-weight: 600;
+        border: 1px solid #d7dbe4; background: #fff; color: #0b1020;
+        padding: 6px 10px; border-radius: 7px; cursor: pointer;
+      }
+      button:hover { background: #f4f6fa; }
+      @media (prefers-color-scheme: dark) {
+        body { background: #141826; color: #eef1f7; }
+        .stat { background: #1d2334; }
+        .privacy { background: #10281c; border-color: #1f5138; color: #7ee2a8; }
+        .row { border-color: #242a3c; }
+        button { background: #1d2334; border-color: #333a50; color: #eef1f7; }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Guidr</h1>
+    <p class="sub">Watching for the moment a scam costs you money.</p>
+
+    <div class="stats">
+      <div class="stat"><b id="blocks">0</b><span>Blocked</span></div>
+      <div class="stat"><b id="warnings">0</b><span>Warnings</span></div>
+    </div>
+
+    <div class="privacy">
+      <b>0 requests sent. Ever.</b>
+      Guidr works entirely on your computer. It does not send your browsing
+      anywhere, does not keep a history, and never reads your passwords or TAC
+      codes. It does not run on your bank's real website at all.
+    </div>
+
+    <div class="row">
+      <span id="site-label">Turn off on this site</span>
+      <button id="toggle-site">Turn off</button>
+    </div>
+    <div class="row">
+      <span>Guidr protection</span>
+      <button id="toggle-all">Pause</button>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

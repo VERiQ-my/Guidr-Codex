@@ -1,0 +1,41 @@
+{
+  "name": "guidr",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "eslint",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+  },
+  "dependencies": {
+    "@google/genai": "^2.3.0",
+    "firebase": "^12.13.0",
+    "firebase-admin": "^12.7.0",
+    "jspdf": "^4.2.1",
+    "libphonenumber-js": "^1.13.2",
+    "next": "^16.2.6",
+    "openai": "^6.48.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-phone-number-input": "^3.4.17",
+    "stripe": "^22.1.1"
+  },
+  "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.1",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.5.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "postcss": "^8.5.14",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^5",
+    "wrangler": "^4.107.0"
+  }
+}

@@ -1,0 +1,167 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+    // Server-owned entitlement keys. The real values live at
+    // users/{uid}/entitlements/plan (Admin SDK writes only); these keys are
+    // ALSO blocked on the profile doc so a tampered client can't plant
+    // look-alike copies that a future reader might trust. See F-1 in
+    // docs/SDD.md.
+    function entitlementKeys() {
+      return ['isSubscribed', 'scanQuota', 'stripeCustomerId',
+              'stripeSubscriptionId', 'subscriptionStatus'];
+    }
+
+    // ── User profiles ──
+    // A user can read and edit their own profile document — EXCEPT the
+    // entitlement fields, which only the server may write. Without this
+    // field-level guard a user could flip isSubscribed / reset scanQuota
+    // from the browser console and grant themselves Pro without paying.
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid)
+        && !request.resource.data.keys().hasAny(entitlementKeys());
+      allow update: if isOwner(uid)
+        && !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(entitlementKeys());
+      allow delete: if isOwner(uid);
+
+      // Entitlements (Pro status, daily scan quota, Stripe linkage).
+      // Written ONLY by the Admin SDK: the Stripe webhook/confirm grant or
+      // revoke Pro, and /api/scan quota accounting counts scans. The owner
+      // may read (the UI shows "scans left" and gates Pro features live);
+      // any client write would let a user forge Pro or reset their quota.
+      match /entitlements/{docId} {
+        allow read: if isOwner(uid);
+        allow write: if false;
+      }
+
+      // Trusted contacts live under the owning user.
+      match /trusted_contacts/{contactId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      // Guardian events (alert feed / weekly digest source). Written ONLY by
+      // the server when a ward this user protects hits a risky scan verdict
+      // (app/api/lib/guardian-alert.ts). The guardian reads their own feed and
+      // may mark entries read; nothing else is client-writable (a ward can't
+      // forge or scrub a guardian's feed). Lives under the guardian's user doc
+      // so `orderBy(at)` needs no composite index.
+      match /guardian_events/{eventId} {
+        allow read: if isOwner(uid);
+        allow update: if isOwner(uid)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+        allow create, delete: if false;
+      }
+
+      // Sign-in sessions (active devices) — one doc per device, keyed by a
+      // client-generated session id. The owner reads them for the sign-in
+      // history list and writes their own device's heartbeat. Bulk revoke
+      // ("sign out other sessions") goes through the Admin SDK server route.
+      match /sessions/{sessionId} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    // ── Cases ──
+    // Owned by the user named in the document's `userId` field.
+    match /cases/{caseId} {
+      allow read: if signedIn() && resource.data.userId == request.auth.uid;
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if signedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // ── Presence ──
+    // Non-sensitive heartbeats (just a lastSeen timestamp) used to count
+    // active users. Anyone signed in may read for counting; only the owner
+    // may write their own heartbeat.
+    match /presence/{uid} {
+      allow read: if signedIn();
+      allow write: if isOwner(uid);
+    }
+
+    // ── Global stats counters ──
+    // Public read (home page community stats). All writes go through the
+    // Admin SDK via /api/stats/bump; clients cannot write directly. This
+    // prevents counter tampering — see F-001 in SECURITY_REVIEW.md.
+    match /stats/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ── Trending scams (global, aggregate) ──
+    // Public read; all writes go through /api/stats/bump (Admin SDK), which
+    // enforces the canonical taxonomy from lib/scam-categories.ts. Without
+    // this gate, a signed-in user could create defamatory entries like
+    // `scams/<real_company_name>_is_a_scam` that surface on the home page.
+    match /scams/{scamId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ── Public scam alerts (shareable) ──
+    // Anyone may read (recipients without an account open via link). Only a
+    // signed-in user may create one, and only as themselves. No edits/deletes.
+    match /alerts/{alertId} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // ── Scan queue (global concurrency gate) ──
+    // The server (Admin SDK in scan-queue.ts) owns all writes: the global slot
+    // counter and the per-request tickets. A user may READ their own ticket to
+    // see its status; nobody writes from the client (would let a user forge a
+    // slot and bypass the Vertex AI concurrency cap).
+    match /scan_tickets/{ticketId} {
+      allow read: if signedIn() && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
+    match /scan_control/{docId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // ── Background scans (durable results) ──
+    // Written ONLY by the server (Admin SDK in /api/scan/run) as the scan
+    // progresses, so a closed/backgrounded client can re-attach and read the
+    // verdict. The owner may READ their own scan; clients never write (that
+    // would let a user forge a verdict).
+    match /scans/{scanId} {
+      allow read: if signedIn() && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // ── Admin announcements (broadcasts) ──
+    // Written ONLY by the Guidr Admin dashboard (Admin SDK bypasses rules).
+    // Any signed-in user may read; pro/free segment filtering happens
+    // client-side in NotificationsBell. Client writes would let a user forge
+    // an official-looking announcement for everyone, hence write: false.
+    match /announcements/{announcementId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // ── Guardian links ──
+    // A "guardian" receives Guardian Alerts about a ward (protected user).
+    // Either party may READ their own links (ward sees who they invited;
+    // guardian sees incoming requests). All WRITES go through the Admin SDK
+    // (server routes) so linking/matching and accept-decline stay tamper-proof.
+    match /guardian_links/{linkId} {
+      allow read: if signedIn() &&
+        (resource.data.wardUid == request.auth.uid ||
+         resource.data.guardianUid == request.auth.uid);
+      allow write: if false;
+    }
+
+    // Everything else is denied by default.
+  }
+}

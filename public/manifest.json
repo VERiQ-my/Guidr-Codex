@@ -1,0 +1,36 @@
+{
+  "name": "Guidr — Security Made Simple",
+  "short_name": "Guidr",
+  "description": "Investigate suspicious messages, detect scams, and protect yourself from online fraud.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#edf1f3",
+  "theme_color": "#0d7377",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

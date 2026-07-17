@@ -1,0 +1,24 @@
+{
+  "// note": [
+    "Editor + typecheck config for the extension. esbuild does the actual",
+    "bundling and does NOT typecheck, so this is what catches type errors:",
+    "  npx tsc --noEmit -p extension/tsconfig.json",
+    "",
+    "It reaches up into ../lib to pull in the shared engine, which is",
+    "deliberate: the engine is the single source of truth for scam rules and",
+    "must not be forked into a copy that drifts."
+  ],
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "types": []
+  },
+  "include": ["src/**/*.ts", "../lib/point-of-harm.ts", "../lib/bank-domains.ts", "../lib/malaysian-banks.ts"]
+}

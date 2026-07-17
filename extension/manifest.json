@@ -1,0 +1,91 @@
+{
+  "manifest_version": 3,
+  "name": "Guidr: Scam Protection",
+  "version": "0.1.0",
+  "description": "Warns you at the moment a scam would cost you money. Works offline. Sends nothing to anyone.",
+
+  "// PRIVACY NOTE": [
+    "Read extension/PRIVACY.md before adding ANY permission here.",
+    "This extension makes zero network requests. Do not add host_permissions",
+    "for an API, do not add 'webRequest', 'history', 'cookies', 'tabs', or",
+    "'downloads'. Each of those turns 'can read the page' into 'can build a",
+    "profile of you', which is the exact thing we tell users we do not do."
+  ],
+
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+
+  "// permissions rationale": {
+    "storage": "Settings and two integer counters, local only. No history, no URLs, no page content.",
+    "activeTab": "Lets the popup read the hostname of the tab you are looking at, so 'turn off on this site' can name the site. Granted only at the moment you click the Guidr icon, and it lapses afterwards.",
+    "downloads (NOT requested)": "Would grant access to the user's entire download history. We detect executable links from their href in the page instead, which needs no permission at all.",
+    "tabs (NOT requested)": "Would grant STANDING access to the URL of every open tab, forever. activeTab gives us the one tab, for one click. The toolbar badge is set via sender.tab.id, which needs neither.",
+    "webRequest (NOT requested)": "Would let us see every request the browser makes. Never.",
+    "history / cookies (NOT requested)": "Self-evident. Never."
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+
+      "// exclude_matches": [
+        "Guidr does not run on a bank website we have VERIFIED. There is nothing to",
+        "detect on the real Maybank, and not running there means the extension is",
+        "structurally incapable of observing your actual banking session.",
+        "",
+        "ONLY VERIFIED DOMAINS GO HERE. This is a security property, not tidiness.",
+        "Excluding a domain makes Guidr completely silent on it. If we excluded",
+        "UNVERIFIED domains too, then a bad entry in lib/bank-domains.ts would",
+        "silence Guidr on an attacker's domain, and the `verified` flag would be",
+        "protecting nothing at all.",
+        "",
+        "So: verified domain -> excluded (we trust it, we look away).",
+        "    unverified domain -> NOT excluded (we do not trust it, we keep watching).",
+        "",
+        "build.mjs enforces BOTH directions and fails the build on either mismatch.",
+        "Do not hand-edit this list; run node scripts/verify-bank-domains.mjs and",
+        "promote domains in lib/bank-domains.ts first."
+      ],
+      "exclude_matches": [
+        "*://*.maybank2u.com.my/*",
+        "*://*.maybank.com/*",
+        "*://*.maybank.com.my/*",
+        "*://*.cimbclicks.com.my/*",
+        "*://*.cimb.com.my/*",
+        "*://*.cimbbank.com.my/*",
+        "*://*.pbebank.com/*",
+        "*://*.rhbgroup.com/*",
+        "*://*.hlb.com.my/*",
+        "*://*.amonline.com.my/*",
+        "*://*.ocbc.com.my/*",
+        "*://*.hsbc.com.my/*",
+        "*://*.sc.com/*",
+        "*://*.alliancebank.com.my/*",
+        "*://*.mbsbbank.com/*",
+        "*://*.gov.my/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Guidr"
+  },
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+
+  "icons": {
+    "128": "icon128.png"
+  }
+}
