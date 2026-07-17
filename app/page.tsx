@@ -13,7 +13,7 @@ import MarketingLanding from "@/app/components/MarketingLanding";
 export const metadata: Metadata = {
   title: { absolute: "Guidr — Check Suspicious Messages, Links & Scams in Malaysia" },
   description:
-    "Free AI scam checker for Malaysia. Paste a suspicious SMS, WhatsApp message, link or phone number and get a clear answer in seconds. Recognised by NSRC Malaysia.",
+    "Free AI scam checker for Malaysia. Paste a suspicious SMS, WhatsApp message, link or phone number and get a clear answer in seconds. Private, built for Malaysia.",
   alternates: {
     canonical: "/",
     languages: { en: "/", ms: "/ms", "x-default": "/" },
