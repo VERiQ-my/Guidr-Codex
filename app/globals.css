@@ -1,0 +1,14 @@
+﻿@import "tailwindcss";
+
+@theme inline {
+  --color-guidr-primary: #086b5d;
+  --color-guidr-ink: #152423;
+  --color-guidr-muted: #5d6b69;
+  --color-guidr-surface: #f2f6f4;
+  --color-guidr-danger: #b42318;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--color-guidr-ink); background: var(--color-guidr-surface); font-family: Arial, Helvetica, sans-serif; }
+button, input, textarea { font: inherit; }
+.scan-panel { border: 1px solid rgb(21 36 35 / 0.08); border-radius: 8px; background: white; box-shadow: 0 1px 2px rgb(21 36 35 / 0.03); }

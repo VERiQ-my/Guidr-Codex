@@ -1,0 +1,32 @@
+{
+  "name": "guidr-codex",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@opennextjs/cloudflare": "^1.20.1",
+    "firebase": "^12.13.0",
+    "firebase-admin": "^12.7.0",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^1.25.0",
+    "next": "^16.2.6",
+    "openai": "^6.0.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "16.2.6",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^5.0.0"
+  }
+}
