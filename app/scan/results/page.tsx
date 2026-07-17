@@ -133,8 +133,8 @@ export default function ResultsPage() {
     };
   }, [releaseSlot, router, runStream]);
 
-  if (phase === "verdict" && analysis) return <main className="mx-auto max-w-2xl px-4 py-6 sm:px-5 sm:py-10"><VerdictView analysis={analysis} /></main>;
-  if (phase === "error") return <main className="mx-auto max-w-2xl px-4 py-6 sm:px-5 sm:py-10"><section className="rounded-lg bg-white p-6"><h1 className="text-xl font-bold">We could not finish that check</h1><p className="mt-2 text-guidr-muted">{message}</p><button className="mt-5 rounded-lg bg-guidr-primary px-4 py-2 text-white" onClick={() => router.replace("/scan")}>Return to scan</button></section></main>;
-  if (phase === "queue") return <main className="mx-auto max-w-2xl px-4 py-6 sm:px-5 sm:py-10"><ScanQueueGame position={queuePosition} /></main>;
-  return <main className="mx-auto max-w-2xl px-4 py-6 sm:px-5 sm:py-10"><InvestigatingView message={message} tools={tools} target={scanTarget} /></main>;
+  if (phase === "verdict" && analysis) return <main className="scan-page min-h-full px-4 py-7 pb-safe sm:px-5 sm:py-10"><VerdictView analysis={analysis} /></main>;
+  if (phase === "error") return <main className="scan-page min-h-full px-4 py-7 pb-safe sm:px-5 sm:py-10"><section className="rounded-lg bg-white p-6"><h1 className="text-xl font-bold">We could not finish that check</h1><p className="mt-2 text-guidr-muted">{message}</p><button className="mt-5 rounded-lg bg-guidr-primary px-4 py-2 text-white" onClick={() => router.replace("/scan")}>Return to scan</button></section></main>;
+  if (phase === "queue") return <main className="scan-page min-h-full px-4 py-7 pb-safe sm:px-5 sm:py-10"><ScanQueueGame position={queuePosition} /></main>;
+  return <main className="scan-page min-h-full px-4 py-7 pb-safe sm:px-5 sm:py-10"><InvestigatingView message={message} tools={tools} target={scanTarget} /></main>;
 }

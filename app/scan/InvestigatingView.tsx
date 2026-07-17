@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { Check, CircleDashed, SearchCheck, ShieldCheck } from "lucide-react";
@@ -29,12 +29,12 @@ export default function InvestigatingView({ message, tools, target }: { message:
   }, [elapsedSeconds, tools.length]);
   const currentLabel = activeIndex >= 0 ? displayTool(checks[activeIndex]) : "Preparing the first check";
 
-  return <section className="scan-panel overflow-hidden">
-    <div className="px-5 py-7 text-center sm:px-8 sm:py-9">
-      <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-guidr-primary text-white shadow-md shadow-guidr-primary/15"><SearchCheck size={24} /></div>
+  return <section className="scan-panel scan-panel-elevated guidr-animate-in overflow-hidden">
+    <div className="scan-investigation-hero px-5 py-8 text-center sm:px-8 sm:py-10">
+      <div className="scan-orbit mx-auto flex size-14 items-center justify-center rounded-full bg-guidr-primary text-white shadow-md shadow-guidr-primary/15"><SearchCheck size={24} /></div>
       <p className="mt-4 text-xs font-bold tracking-[0.13em] text-guidr-primary">GUIDR IS CHECKING</p>
       <h1 className="mt-2 text-2xl font-bold">Taking a careful look</h1>
-      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-guidr-muted" aria-live="polite">{message}</p>
+      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-guidr-muted" aria-live="polite">{message}</p><p className="scan-elapsed">Review in progress - {elapsedSeconds}s elapsed</p>
 
       <div className="mx-auto mt-7 max-w-md text-left">
         <div className="flex items-end justify-between gap-3"><div><p className="text-sm font-semibold">{currentLabel}</p><p className="mt-0.5 text-xs text-guidr-muted">Usually ready in under two minutes.</p></div><strong className="text-3xl leading-none text-guidr-primary" aria-label={progress + " percent complete"}>{progress}%</strong></div>

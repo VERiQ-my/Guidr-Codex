@@ -40,3 +40,4 @@ Thumbs.db
 .open-next/
 .wrangler/
 
+.firebase-service-account.json

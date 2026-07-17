@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { jsPDF } from "jspdf";
 import { useRouter } from "next/navigation";
@@ -80,15 +80,15 @@ export default function VerdictView({ analysis }: { analysis: Analysis }) {
     LIKELY_SAFE: { label: "NO URGENT RISK", accent: "bg-emerald-600", badge: "bg-emerald-700 text-white", note: "No strong scam signals were found. Continue carefully and stay alert for changes.", signals: "border-emerald-300 bg-emerald-50/60" },
   }[analysis.verdict];
 
-  return <section className="scan-panel overflow-hidden">
-    <header className={"p-5 sm:p-7 " + verdict.tone}>
+  return <section className="scan-panel scan-panel-elevated guidr-animate-in overflow-hidden">
+    <header className={"scan-verdict-hero p-5 sm:p-7 " + verdict.tone}>
       <div className="flex items-start justify-between gap-4"><div className="flex min-w-0 items-start gap-3.5"><span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white/80 shadow-sm"><Icon size={23} /></span><div><p className="text-xs font-bold tracking-[0.13em] opacity-70">GUIDR ASSESSMENT</p><h1 className="mt-1 text-2xl font-bold sm:text-3xl">{verdict.title}</h1></div></div><span className={"shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-[0.1em] " + presentation.badge}>{presentation.label}</span></div>
       <p className="mt-4 max-w-xl text-sm leading-6 opacity-85">{analysis.summary}</p>
       <div className="mt-5 rounded-xl border border-black/5 bg-white/65 p-4"><p className="text-xs font-bold tracking-[0.1em] opacity-65">RECOMMENDED FIRST MOVE</p><p className="mt-1.5 text-sm font-semibold leading-5">{presentation.note}</p></div>
       <div className="mt-5 flex items-center gap-4"><strong className="text-3xl leading-none">{analysis.confidence}%</strong><div className="min-w-0 flex-1"><div className="h-2 overflow-hidden rounded-full bg-black/10"><div className={"h-full rounded-full " + presentation.accent} style={{ width: analysis.confidence + "%" }} /></div><p className="mt-1.5 text-xs opacity-70">Signal confidence - not a guarantee of safety</p></div></div>
     </header>
 
-    <div className="p-5 sm:p-6">
+    <div className="p-5 sm:p-6">{analysis.assessment_mode === "fallback" && <div role="status" className="mb-6 flex items-start gap-2.5 rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-sm leading-5 text-amber-800"><CircleHelp size={17} className="mt-0.5 shrink-0" /><p><strong>Limited pattern check</strong><br />Live AI review is temporarily unavailable. This result is based on common risk cues in the supplied text and cannot confirm safety.</p></div>}
       {analysis.verdict === "SCAM" && <section className="mb-7" aria-labelledby="immediate-help"><h2 id="immediate-help" className="mb-3 flex items-center gap-2 font-bold text-red-800"><PhoneCall size={18} />If money was sent, act now</h2><ReportCard urgent title="Call NSRC 997 now" body="Call first, then contact your bank. Acting quickly can help protect your account and preserve your options." action="Call 997" icon={PhoneCall} href="tel:997" /></section>}
       <section aria-labelledby="verdict-summary"><h2 id="verdict-summary" className="flex items-center gap-2 font-bold"><ClipboardList size={18} className="text-guidr-primary" />At a glance</h2><dl className="mt-3 overflow-hidden rounded-xl border border-black/8 sm:grid sm:grid-cols-3 sm:divide-x sm:divide-black/8"><div className="p-3.5"><dt className="text-xs font-medium text-guidr-muted">Assessment</dt><dd className="mt-1 text-sm font-bold">{assessment}</dd></div><div className="border-t border-black/8 p-3.5 sm:border-t-0"><dt className="text-xs font-medium text-guidr-muted">Signal confidence</dt><dd className="mt-1 text-sm font-bold">{analysis.confidence}%</dd></div><div className="border-t border-black/8 p-3.5 sm:border-t-0"><dt className="text-xs font-medium text-guidr-muted">Pattern</dt><dd className="mt-1 text-sm font-bold">{displayScamCategory(analysis.scam_type)}</dd></div></dl></section>
 
