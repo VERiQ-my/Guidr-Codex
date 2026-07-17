@@ -1,5 +1,42 @@
-node_modules
-.next
-.open-next
-.env.local
-.dev.vars.wrangler/
+# Dependencies
+/node_modules/
+/.pnp/
+.pnp.*
+
+# Next.js build output
+/.next/
+/out/
+/build/
+
+# Local environment files and Firebase credentials
+.env
+.env.*
+!.env.example
+
+# Firebase emulator logs
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Test coverage and TypeScript incremental state
+/coverage/
+*.tsbuildinfo
+/next-env.d.ts
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local deployment and editor state
+/.vercel/
+/.vscode/
+
+# OS and certificate files
+.DS_Store
+Thumbs.db
+*.pem
+.open-next/
+.wrangler/
+

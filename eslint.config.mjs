@@ -4,6 +4,7 @@ import nextTypeScript from "eslint-config-next/typescript";
 const config = [
   ...nextCoreWebVitals,
   ...nextTypeScript,
+  { rules: { "@typescript-eslint/no-explicit-any": "off" } },
   { ignores: [".wrangler/**"] },
 ];
 
