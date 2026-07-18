@@ -1,15 +1,162 @@
-﻿import type { Analysis } from "@/lib/scan-types";import type { Entitlements } from "@/lib/plan";import { logger } from "./logger";import {  collection,  doc,  limit,  onSnapshot,  orderBy,  query,  where,  Timestamp,  type Unsubscribe,} from "firebase/firestore";import { db } from "./firebase";/** Swallow the transient permission-denied that happens while the auth token *  propagates to Firestore on sign-in; surface anything else. */function handleListenerError(label: string) {  return (err: { code?: string; message?: string }) => {    if (err.code === "permission-denied") return;    logger.error(`[Guidr] ${label} listener error:`, err);  };}/* â”€â”€ Global aggregate counters (stats/global) â”€â”€ */export interface GlobalStats {  totalCases: number;  reportedNSRC: number;  totalUsers: number;}const globalStatsRef = () => doc(db, "stats", "global");export function subscribeGlobalStats(callback: (stats: GlobalStats) => void): Unsubscribe {  return onSnapshot(    globalStatsRef(),    (snap) => {      const d = snap.exists() ? snap.data() : {};      callback({        totalCases: d.totalCases || 0,        reportedNSRC: d.reportedNSRC || 0,        totalUsers: d.totalUsers || 0,      });    },    handleListenerError("global_stats")  );}/* â”€â”€ Guardian links (guardians only; drives WardOverview) â”€â”€ */export interface GuardianLink {  id?: string;  wardUid: string;  wardName: string;  guardianUid: string;  guardianPhone?: string;  guardianName?: string;  status: "invited" | "pending" | "active" | "declined";  createdAt?: Timestamp;  inviteToken?: string;}export function subscribeIncomingGuardianRequests(  guardianUid: string,  callback: (links: GuardianLink[]) => void): Unsubscribe {  const q = query(collection(db, "guardian_links"), where("guardianUid", "==", guardianUid));  return onSnapshot(    q,    (snap) => callback(snap.docs.map((d) => ({ id: d.id, ...d.data() } as GuardianLink))),    handleListenerError("guardian_links")  );}/* â”€â”€ Guardian events (per guardian; server-written) â”€â”€ */export interface GuardianEvent {  id?: string;  wardUid: string;  wardName: string;  verdict: "SCAM" | "SUSPICIOUS";  confidence: "HIGH" | "MEDIUM" | "LOW";  scamType: string;  at: number;  read: boolean;}export function subscribeGuardianEvents(  guardianUid: string,  callback: (events: GuardianEvent[]) => void,  max = 20): Unsubscribe {  const q = query(    collection(db, "users", guardianUid, "guardian_events"),    orderBy("at", "desc"),    limit(max)  );  return onSnapshot(    q,    (snap) => callback(snap.docs.map((d) => ({ id: d.id, ...d.data() } as GuardianEvent))),    handleListenerError("guardian_events")  );}// Scan actions are intentionally best-effort: a completed verdict must never be blocked by optional account sync.export async function saveCase(_analysis: Analysis) { void _analysis; }export async function awardXP(_amount: number) { void _amount; }export async function incrementStat(_name: 'casesScanned') { void _name; }export async function incrementScamType(_type: string) { void _type; }export function subscribeEntitlements(_uid: string, callback: (value: Entitlements) => void) {  void _uid;  callback({ isPro: false, scansUsedToday: 0 });  return () => undefined;}
-export type LearningProfile = { xp?: number; casesScanned?: number; articlesRead?: string[]; lastChallengeDate?: string };
+import type { Analysis } from "@/lib/scan-types";
+import type { Entitlements } from "@/lib/plan";
+import { logger } from "./logger";
+import {
+  arrayUnion,
+  collection,
+  doc,
+  increment,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+  setDoc,
+  Timestamp,
+  type Unsubscribe,
+  where,
+} from "firebase/firestore";
+import { db } from "./firebase";
+
+/** Swallow the transient permission-denied while an auth token reaches Firestore. */
+function handleListenerError(label: string) {
+  return (error: { code?: string; message?: string }) => {
+    if (error.code === "permission-denied") return;
+    logger.error(`[Guidr] ${label} listener error:`, error);
+  };
+}
+
+export interface GlobalStats {
+  totalCases: number;
+  reportedNSRC: number;
+  totalUsers: number;
+}
+
+const globalStatsRef = () => doc(db, "stats", "global");
+
+export function subscribeGlobalStats(callback: (stats: GlobalStats) => void): Unsubscribe {
+  return onSnapshot(
+    globalStatsRef(),
+    (snapshot) => {
+      const data = snapshot.exists() ? snapshot.data() : {};
+      callback({
+        totalCases: data.totalCases || 0,
+        reportedNSRC: data.reportedNSRC || 0,
+        totalUsers: data.totalUsers || 0,
+      });
+    },
+    handleListenerError("global_stats"),
+  );
+}
+
+export interface GuardianLink {
+  id?: string;
+  wardUid: string;
+  wardName: string;
+  guardianUid: string;
+  guardianPhone?: string;
+  guardianName?: string;
+  status: "invited" | "pending" | "active" | "declined";
+  createdAt?: Timestamp;
+  inviteToken?: string;
+}
+
+export function subscribeIncomingGuardianRequests(
+  guardianUid: string,
+  callback: (links: GuardianLink[]) => void,
+): Unsubscribe {
+  const results = query(collection(db, "guardian_links"), where("guardianUid", "==", guardianUid));
+  return onSnapshot(
+    results,
+    (snapshot) => callback(snapshot.docs.map((entry) => ({ id: entry.id, ...entry.data() }) as GuardianLink)),
+    handleListenerError("guardian_links"),
+  );
+}
+
+export interface GuardianEvent {
+  id?: string;
+  wardUid: string;
+  wardName: string;
+  verdict: "SCAM" | "SUSPICIOUS";
+  confidence: "HIGH" | "MEDIUM" | "LOW";
+  scamType: string;
+  at: number;
+  read: boolean;
+}
+
+export function subscribeGuardianEvents(
+  guardianUid: string,
+  callback: (events: GuardianEvent[]) => void,
+  max = 20,
+): Unsubscribe {
+  const results = query(
+    collection(db, "users", guardianUid, "guardian_events"),
+    orderBy("at", "desc"),
+    limit(max),
+  );
+  return onSnapshot(
+    results,
+    (snapshot) => callback(snapshot.docs.map((entry) => ({ id: entry.id, ...entry.data() }) as GuardianEvent)),
+    handleListenerError("guardian_events"),
+  );
+}
+
+// Scan actions are intentionally best-effort: a completed verdict must never be blocked by account sync.
+export async function saveCase(analysis: Analysis) {
+  void analysis;
+}
+
+export async function awardXP(amount: number) {
+  void amount;
+}
+
+export async function incrementStat(name: "casesScanned") {
+  void name;
+}
+
+export async function incrementScamType(type: string) {
+  void type;
+}
+
+export function subscribeEntitlements(uid: string, callback: (value: Entitlements) => void) {
+  void uid;
+  callback({ isPro: false, scansUsedToday: 0 });
+  return () => undefined;
+}
+
+export type LearningProfile = {
+  xp?: number;
+  casesScanned?: number;
+  articlesRead?: string[];
+  lastChallengeDate?: string;
+};
 
 export function subscribeLearningProfile(uid: string, callback: (profile: LearningProfile) => void) {
-  return onSnapshot(doc(db, "users", uid), (snap) => callback((snap.exists() ? snap.data() : {}) as LearningProfile), handleListenerError("learning_profile"));
+  return onSnapshot(
+    doc(db, "users", uid),
+    (snapshot) => callback((snapshot.exists() ? snapshot.data() : {}) as LearningProfile),
+    handleListenerError("learning_profile"),
+  );
 }
 
-export async function ensureUserProfile(uid: string, data: { fullName?: string; email?: string | null; photoURL?: string | null }) {
-  await setDoc(doc(db, "users", uid), { fullName: data.fullName || "User", username: data.email?.split("@")[0] || "user", email: data.email || null, photoURL: data.photoURL || null }, { merge: true });
+export async function ensureUserProfile(
+  uid: string,
+  data: { fullName?: string; email?: string | null; photoURL?: string | null },
+) {
+  await setDoc(
+    doc(db, "users", uid),
+    {
+      fullName: data.fullName || "User",
+      username: data.email?.split("@")[0] || "user",
+      email: data.email || null,
+      photoURL: data.photoURL || null,
+    },
+    { merge: true },
+  );
 }
 
-export async function updateUserProfile(uid: string, data: Record<string, unknown>) { await setDoc(doc(db, "users", uid), data, { merge: true }); }
+export async function updateUserProfile(uid: string, data: Record<string, unknown>) {
+  await setDoc(doc(db, "users", uid), data, { merge: true });
+}
 
 export async function markArticleRead(uid: string, articleId: string, xp: number, alreadyRead: boolean) {
   const changes: Record<string, unknown> = { articlesRead: arrayUnion(articleId) };
@@ -17,4 +164,6 @@ export async function markArticleRead(uid: string, articleId: string, xp: number
   await setDoc(doc(db, "users", uid), changes, { merge: true });
 }
 
-export async function completeDailyChallenge(uid: string, date: string, xp: number) { await setDoc(doc(db, "users", uid), { lastChallengeDate: date, xp: increment(xp) }, { merge: true }); }
+export async function completeDailyChallenge(uid: string, date: string, xp: number) {
+  await setDoc(doc(db, "users", uid), { lastChallengeDate: date, xp: increment(xp) }, { merge: true });
+}
