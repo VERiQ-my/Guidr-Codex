@@ -1,12 +1,12 @@
-﻿"use client";
+"use client";
 
 import { logger } from "@/lib/logger";
-import { createContext, useContext, ReactNode, useEffect, useState } from "react";
+import { auth, db, isFirebaseConfigured } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { useRouter, usePathname } from "next/navigation";
-import { auth, db } from "@/lib/firebase";
-import { ensureUserProfile } from "@/lib/firestore";
+import { usePathname, useRouter } from "next/navigation";
+import { createContext, useContext, useEffect, useState } from "react";
+import type { ReactNode } from "react";
 
 export interface UserProfile {
   uid: string;
@@ -37,14 +37,19 @@ function isPublicPath(pathname: string): boolean {
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isFirebaseConfigured);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    // Let the scanner be evaluated locally without Firebase credentials.
+    // Authenticated features remain unavailable until Firebase is configured.
+    if (!isFirebaseConfigured) return;
+
+    let unsubscribe: (() => void) | undefined;
+    try {
+      unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // Render immediately from what auth knows, then enrich from Firestore.
         setUser({
           uid: firebaseUser.uid,
           fullName: firebaseUser.displayName || "User",
@@ -54,15 +59,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
         });
         setLoading(false);
 
-        void ensureUserProfile(firebaseUser.uid, {
-          fullName: firebaseUser.displayName,
-          email: firebaseUser.email,
-          photoURL: firebaseUser.photoURL,
-        }).catch((error) => logger.error("Error ensuring user profile:", error));
-
         try {
           const userDocRef = doc(db, "users", firebaseUser.uid);
           const userDoc = await getDoc(userDocRef);
+
           if (userDoc.exists()) {
             const data = userDoc.data();
             setUser({
@@ -83,18 +83,25 @@ export function UserProvider({ children }: { children: ReactNode }) {
           try {
             onboarded = localStorage.getItem("guidr_onboarded") === "1";
           } catch {
-            /* storage disabled â€” treat as not yet onboarded */
+            // Storage is unavailable; direct the person through onboarding.
           }
           router.push(onboarded ? "/login" : "/onboarding");
         }
         setLoading(false);
       }
-    });
+      });
+    } catch (error) {
+      logger.warn("Firebase authentication is unavailable; continuing in local scan-only mode.", error);
+      queueMicrotask(() => {
+        setUser(null);
+        setLoading(false);
+      });
+      return;
+    }
 
-    return () => unsubscribe();
+    return () => unsubscribe?.();
   }, [pathname, router]);
 
-  // Loading skeleton that mimics the app chrome on protected routes.
   if (loading && !isPublicPath(pathname)) {
     return (
       <div className="min-h-dvh bg-guidr-bg flex flex-col">
@@ -110,8 +117,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
           <div className="h-20 rounded-2xl animate-pulse bg-gray-200" />
         </div>
         <div className="lg:hidden h-16 border-t border-gray-100 bg-white flex items-center justify-around px-5 pb-safe-bottom">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex flex-col items-center gap-1">
+          {[0, 1, 2, 3, 4].map((index) => (
+            <div key={index} className="flex flex-col items-center gap-1">
               <div className="w-6 h-6 rounded animate-pulse bg-gray-200" />
               <div className="w-10 h-2 rounded animate-pulse bg-gray-200" />
             </div>
@@ -121,15 +128,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
     );
   }
 
-  return (
-    <UserContext.Provider value={{ user, loading }}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={{ user, loading }}>{children}</UserContext.Provider>;
 }
 
 export function useUser() {
-  const ctx = useContext(UserContext);
-  if (!ctx) throw new Error("useUser must be used within UserProvider");
-  return ctx;
+  const context = useContext(UserContext);
+  if (!context) throw new Error("useUser must be used within UserProvider");
+  return context;
 }
