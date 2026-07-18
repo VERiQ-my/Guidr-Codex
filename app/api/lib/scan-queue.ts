@@ -50,4 +50,6 @@ export function verifySlot(ticketId: string, slotToken: string, userId: string) 
 }
 
 // Signed slots expire automatically; no shared in-memory release bookkeeping is needed.
-export function release(_slotToken?: string) {}
+export function release(slotToken?: string) {
+  void slotToken;
+}

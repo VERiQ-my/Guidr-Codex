@@ -5,7 +5,7 @@ const config = [
   ...nextCoreWebVitals,
   ...nextTypeScript,
   { rules: { "@typescript-eslint/no-explicit-any": "off" } },
-  { ignores: [".wrangler/**"] },
+  { ignores: [".next/**", ".open-next/**", ".wrangler/**"] },
 ];
 
 export default config;

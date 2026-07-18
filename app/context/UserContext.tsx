@@ -39,18 +39,14 @@ function isPublicPath(pathname: string): boolean {
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isFirebaseConfigured);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     // Let the scanner be evaluated locally without Firebase credentials.
     // Authenticated features remain unavailable until Firebase is configured.
-    if (!isFirebaseConfigured) {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
+    if (!isFirebaseConfigured) return;
 
     let unsubscribe: (() => void) | undefined;
     try {
@@ -95,11 +91,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
         }
         setLoading(false);
       }
+      }, (error) => {
+        logger.warn("Firebase authentication is unavailable; continuing in local scan-only mode.", error);
+        setUser(null);
+        setLoading(false);
       });
     } catch (error) {
       logger.warn("Firebase authentication is unavailable; continuing in local scan-only mode.", error);
-      setUser(null);
-      setLoading(false);
+      queueMicrotask(() => {
+        setUser(null);
+        setLoading(false);
+      });
       return;
     }
 
