@@ -1,5 +1,5 @@
 // The OpenNext handler is generated during `npm run deploy`.
-// @ts-expect-error .open-next is build output.
+// @ts-ignore OpenNext generates this module after Next.js type checking.
 import handler from "./.open-next/worker.js";
 
 export default {

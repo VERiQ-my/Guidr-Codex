@@ -1,10 +1,8 @@
 import { runScanAgent } from "@/app/api/lib/scan-runner";
 import { release, verifySlot } from "@/app/api/lib/scan-queue";
-import { saveCompletedScan } from "@/app/api/lib/firebase-admin";
 import { validateScanInput } from "@/lib/scan-validation";
-import type { Analysis, ScanEvent } from "@/lib/scan-types";
+import type { ScanEvent } from "@/lib/scan-types";
 
-export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const encoder = new TextEncoder();
@@ -32,16 +30,13 @@ export async function POST(request: Request) {
   const slotToken = body.slotToken;
   const stream = new ReadableStream({
     async start(controller) {
-      let analysis: Analysis | undefined;
       try {
         await runScanAgent({
           input: parsed.input,
           emit: (event) => {
-            if (event.type === "verdict" && event.analysis) analysis = event.analysis;
             controller.enqueue(eventLine(event));
           },
         });
-        if (analysis) await saveCompletedScan({ scanId: ticketId, userId, analysis });
         controller.enqueue(encoder.encode("event: done\ndata: {}\n\n"));
       } finally {
         release(slotToken);
