@@ -1,7 +1,7 @@
 ﻿import type { Analysis } from "@/lib/scan-types";
 import type { Entitlements } from "@/lib/plan";
 import { logger } from "./logger";
-import { arrayUnion, collection, doc, increment, limit, onSnapshot, orderBy, query, setDoc, Timestamp, type Unsubscribe, where } from "firebase/firestore";
+import { addDoc, arrayUnion, collection, doc, increment, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, Timestamp, type Unsubscribe, where } from "firebase/firestore";
 import { auth, db } from "./firebase";
 
 function handleListenerError(label: string) { return (err: { code?: string; message?: string }) => { if (err.code !== "permission-denied") logger.error(`[Guidr] ${label} listener error:`, err); }; }
@@ -11,7 +11,7 @@ export interface GuardianLink { id?: string; wardUid: string; wardName: string; 
 export function subscribeIncomingGuardianRequests(guardianUid: string, callback: (links: GuardianLink[]) => void): Unsubscribe { return onSnapshot(query(collection(db, "guardian_links"), where("guardianUid", "==", guardianUid)), (snap) => callback(snap.docs.map((item) => ({ id: item.id, ...item.data() } as GuardianLink))), handleListenerError("guardian_links")); }
 export interface GuardianEvent { id?: string; wardUid: string; wardName: string; verdict: "SCAM" | "SUSPICIOUS"; confidence: "HIGH" | "MEDIUM" | "LOW"; scamType: string; at: number; read: boolean; }
 export function subscribeGuardianEvents(guardianUid: string, callback: (events: GuardianEvent[]) => void, max = 20): Unsubscribe { return onSnapshot(query(collection(db, "users", guardianUid, "guardian_events"), orderBy("at", "desc"), limit(max)), (snap) => callback(snap.docs.map((item) => ({ id: item.id, ...item.data() } as GuardianEvent))), handleListenerError("guardian_events")); }
-export async function saveCase(_analysis: Analysis) { void _analysis; }
+export async function saveCase(analysis: Analysis) { const uid = auth.currentUser?.uid; if (!uid) return; await addDoc(collection(db, "cases"), { userId: uid, verdict: analysis.verdict, confidence: analysis.confidence, scamType: analysis.scam_type, summary: analysis.summary, manipulationTactics: analysis.manipulation_tactics, reportedToNSRC: false, createdAt: serverTimestamp() }); }
 export async function awardXP(amount: number) { const uid = auth.currentUser?.uid; if (uid) await setDoc(doc(db, "users", uid), { xp: increment(amount) }, { merge: true }); }
 export async function incrementStat(name: "casesScanned") { const uid = auth.currentUser?.uid; if (uid) await setDoc(doc(db, "users", uid), { [name]: increment(1) }, { merge: true }); }
 export async function incrementScamType(_type: string) { void _type; }
