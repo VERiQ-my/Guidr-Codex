@@ -8,7 +8,7 @@ type Pattern = { expression: RegExp; evidence: string; tactic?: string; category
 const stages = [
   ["extract_message_details", "Reading the message and attachment."],
   ["review_requests_and_links", "Normalizing Malaysian-language signals."],
-  ["assess_scam_signals", "Cross-checking GPT-5.6 with Databricks intelligence."],
+  ["assess_scam_signals", "Cross-checking independent safety signals."],
   ["prepare_safety_advice", "Preparing safer next steps."],
 ] as const;
 
@@ -47,7 +47,7 @@ export async function runScanAgent({ input, emit }: { input: ScanInput; emit: Em
   const complete = async (index: number) => { completed = Math.max(completed, index + 1); await emit({ type: "tool_complete", tool: stages[index][0], message: "Step complete." }); };
   try {
     await start(0);
-    await emit({ type: "status", message: "GPT-5.6 is reading the supplied message and attachment." });
+    await emit({ type: "status", message: "Reviewing the supplied message and attachment." });
     const analysis = await scanWithGuidrIntelligence(input);
     await complete(0);
     await start(1); await complete(1);

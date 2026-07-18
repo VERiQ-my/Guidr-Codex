@@ -43,11 +43,11 @@ export function toUiAnalysis(result: ReconciledScan): Analysis {
   const tactics = unique([...(result.openai?.manipulation_tactics || []), ...(result.mallam?.local_scam_signals || [])]).slice(0, 6);
   const category = normalizeScamType(result.openai?.category || result.patterns[0]?.category || (verdict === "LIKELY_SAFE" ? SAFE_CATEGORY : "Other"));
   const summary = result.verdict === "needs_review"
-    ? "GPT-5.6 and the independent Databricks risk lane reached different conclusions. Treat this as suspicious and verify it through official channels before acting."
+    ? "Independent safety checks reached different conclusions. Treat this as suspicious and verify it through official channels before acting."
     : result.partial
-      ? `Partial assessment: ${result.openai ? "GPT-5.6" : "the Databricks Malaysian intelligence lane"} was available while the other provider was unavailable. ${result.openai?.reasoning || result.databricks?.reasoning || "Verify independently before acting."}`
-      : result.openai?.reasoning || result.databricks?.reasoning || "Guidr completed a cross-provider scam assessment.";
-  return { verdict, confidence: result.confidence, scam_type: category, summary, manipulation_tactics: tactics, evidence_chain: evidence.length ? evidence : ["No provider evidence was available beyond the combined risk assessment."], recommended_actions: recommendedActions(result.verdict), assessment_mode: result.partial ? "partial" : "ai" };
+      ? `Partial assessment: One independent safety check was unavailable. ${result.openai?.reasoning || result.databricks?.reasoning || "Verify independently before acting."}`
+      : result.openai?.reasoning || result.databricks?.reasoning || "Guidr completed a cross-checked safety assessment.";
+  return { verdict, confidence: result.confidence, scam_type: category, summary, manipulation_tactics: tactics, evidence_chain: evidence.length ? evidence : ["No assessment evidence was available beyond the combined risk assessment."], recommended_actions: recommendedActions(result.verdict), assessment_mode: result.partial ? "partial" : "ai" };
 }
 
 function sourceText(input: ScanInput, gpt: ExtractedScan | null) {

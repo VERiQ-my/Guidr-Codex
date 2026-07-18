@@ -56,4 +56,5 @@ test("provider disagreement maps safely to the existing suspicious verdict UI", 
   assert.equal(ui.verdict, "SUSPICIOUS");
   assert.equal(ui.confidence, 0);
   assert.equal(ui.assessment_mode, "ai");
+  assert.doesNotMatch(ui.summary, /(gpt|openai|databricks|mallam|llama)/i);
 });
