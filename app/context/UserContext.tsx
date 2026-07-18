@@ -30,6 +30,8 @@ function isPublicPath(pathname: string): boolean {
     pathname === "/ms" ||
     pathname === "/login" ||
     pathname === "/onboarding" ||
+    pathname === "/scan" ||
+    pathname.startsWith("/scan/") ||
     pathname.startsWith("/alert") ||
     pathname.startsWith("/guardian/invite")
   );
