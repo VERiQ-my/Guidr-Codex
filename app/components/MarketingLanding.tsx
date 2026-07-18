@@ -10,8 +10,7 @@ const copy = {
   en: {
     signIn: "Sign in",
     langSwitch: { href: "/ms", label: "Bahasa Melayu" },
-    badge: "Recognised by NSRC Malaysia",
-    h1: "Check if a message is real â€” or a scam",
+    h1: "Check if a message is real or a scam",
     sub: "Paste a suspicious SMS, WhatsApp message, link, or phone number and Guidr's AI investigates it for you. You get a clear answer in plain language. Built for Malaysia.",
     cta: "Get started for free",
     haveAccount: "Already have an account?",
@@ -36,7 +35,6 @@ const copy = {
   ms: {
     signIn: "Log masuk",
     langSwitch: { href: "/", label: "English" },
-    badge: "Diiktiraf oleh NSRC Malaysia",
     h1: "Semak sama ada mesej itu benar â€” atau scam",
     sub: "Tampal SMS, mesej WhatsApp, pautan atau nombor telefon yang mencurigakan, dan AI Guidr akan menyiasatnya serta memberikan jawapan yang jelas dalam bahasa mudah. Dibina untuk Malaysia.",
     cta: "Mula sekarang secara percuma",
@@ -108,10 +106,6 @@ export default function MarketingLanding({ locale }: { locale: LandingLocale }) 
 
       <main className="flex-1">
         <section className="max-w-5xl mx-auto px-5 pt-10 pb-12 lg:pt-16 lg:pb-16 text-center">
-          <p className="inline-flex items-center gap-2 text-xs font-semibold text-guidr-primary bg-guidr-primary-light rounded-full px-3 py-1.5 mb-5">
-            <FeatureIcon name="shield" />
-            {t.badge}
-          </p>
           <h1 className="text-3xl lg:text-5xl font-bold text-guidr-text leading-tight mb-4 max-w-3xl mx-auto">
             {t.h1}
           </h1>
