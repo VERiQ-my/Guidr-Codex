@@ -178,7 +178,7 @@ export default function EmailComposerModal({
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-guidr-text">{p.name}</p>
                 <p className="text-xs text-guidr-muted mt-0.5 leading-relaxed">
-                  {p.id === "copy" && copied ? "Copied to clipboard âœ“" : p.caption}
+                  {p.id === "copy" && copied ? "Copied to clipboard ✓" : p.caption}
                 </p>
               </div>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7b8794" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-1">

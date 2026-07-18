@@ -62,7 +62,7 @@ function buildBuckets(cases: TrendCase[], range: TrendRange, now: number): Bucke
       const fmt = (d: Date) => d.toLocaleDateString("en-MY", { day: "numeric", month: "short" });
       buckets.push({
         label: i === n - 1 || i === 0 || i === Math.floor(n / 2) ? fmt(startD) : "",
-        full: `${fmt(startD)} â€“ ${fmt(endD)}`,
+        full: `${fmt(startD)} – ${fmt(endD)}`,
         count,
       });
     }

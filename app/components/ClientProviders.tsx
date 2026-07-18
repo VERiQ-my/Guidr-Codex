@@ -7,7 +7,7 @@ import { PrefsProvider } from "@/app/context/PrefsContext";
 /**
  * Minimal provider tree for the Home + Analytics port. The full app also mounts
  * ToastProvider, the service worker, push, app-lock, install-prompt and the
- * splash LoadingScreen here â€” all out of scope and omitted.
+ * splash LoadingScreen here — all out of scope and omitted.
  */
 export default function ClientProviders({ children }: { children: ReactNode }) {
   return (

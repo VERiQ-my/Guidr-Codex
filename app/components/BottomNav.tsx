@@ -66,7 +66,7 @@ export default function BottomNav() {
 
   return (
     <>
-      {/* MOBILE / TABLET â€” bottom navigation bar */}
+      {/* MOBILE / TABLET — bottom navigation bar */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-100 shadow-[0_-2px_20px_rgba(0,0,0,0.04)]">
         <div className="max-w-md mx-auto flex items-end px-2 pt-2 pb-nav-safe">
           {navItems.map((item) => {
@@ -120,7 +120,7 @@ export default function BottomNav() {
         </div>
       </nav>
 
-      {/* DESKTOP â€” fixed left sidebar */}
+      {/* DESKTOP — fixed left sidebar */}
       <aside className="hidden lg:flex fixed top-0 left-0 z-40 h-screen w-60 flex-col bg-white border-r border-gray-100 shadow-[2px_0_20px_rgba(0,0,0,0.03)]">
         <Link href="/" className="flex items-center gap-2 px-5 h-20 shrink-0 border-b border-gray-100">
           <div className="w-10 h-10 relative overflow-hidden shrink-0">

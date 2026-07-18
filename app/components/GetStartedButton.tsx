@@ -17,7 +17,7 @@ export default function GetStartedButton({
     try {
       onboarded = localStorage.getItem("guidr_onboarded") === "1";
     } catch {
-      /* storage disabled â€” treat as not yet onboarded */
+      /* storage disabled — treat as not yet onboarded */
     }
     router.push(onboarded ? "/login" : "/onboarding");
   };

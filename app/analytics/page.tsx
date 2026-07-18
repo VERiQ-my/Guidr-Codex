@@ -261,7 +261,7 @@ export default function AnalyticsPage() {
             onClick={() => setShowPartnerPicker(true)}
             className="block w-full text-center bg-guidr-blue hover:bg-blue-600 text-white font-semibold py-3 rounded-xl transition-colors"
           >
-            Inquire to advertise â†’
+            Inquire to advertise
           </button>
         </div>
 

@@ -35,7 +35,7 @@ const copy = {
   ms: {
     signIn: "Log masuk",
     langSwitch: { href: "/", label: "English" },
-    h1: "Semak sama ada mesej itu benar â€” atau scam",
+    h1: "Semak sama ada mesej itu benar — atau scam",
     sub: "Tampal SMS, mesej WhatsApp, pautan atau nombor telefon yang mencurigakan, dan AI Guidr akan menyiasatnya serta memberikan jawapan yang jelas dalam bahasa mudah. Dibina untuk Malaysia.",
     cta: "Mula sekarang secara percuma",
     haveAccount: "Sudah ada akaun?",
@@ -173,7 +173,7 @@ export default function MarketingLanding({ locale }: { locale: LandingLocale }) 
       </main>
 
       <footer className="max-w-5xl mx-auto w-full px-5 py-6 pb-safe-bottom flex items-center justify-between text-xs text-guidr-muted">
-        <span>Â© {new Date().getFullYear()} Guidr</span>
+        <span>© {new Date().getFullYear()} Guidr</span>
         <Link href={t.langSwitch.href} className="hover:text-guidr-text transition-colors">
           {t.langSwitch.label}
         </Link>

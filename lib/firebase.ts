@@ -28,7 +28,7 @@ if (USE_EMULATOR && !_firestoreEmulatorConnected) {
     connectFirestoreEmulator(db, "localhost", 8080);
     _firestoreEmulatorConnected = true;
   } catch {
-    // Already connected (HMR re-eval) â€” safe to ignore.
+    // Already connected (HMR re-eval) — safe to ignore.
   }
 }
 
@@ -41,7 +41,7 @@ const auth = new Proxy({} as Auth, {
         try {
           connectAuthEmulator(_auth, "http://localhost:9099");
         } catch {
-          // Already connected (HMR re-eval) â€” safe to ignore.
+          // Already connected (HMR re-eval) — safe to ignore.
         }
       }
     }

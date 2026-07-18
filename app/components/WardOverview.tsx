@@ -65,7 +65,7 @@ export default function WardOverview({ periodMs, now }: { periodMs: number; now:
       <div className="flex items-baseline justify-between mb-3">
         <h3 className="text-base font-bold text-guidr-text">People you protect</h3>
         <Link href="/settings" className="text-xs font-bold text-guidr-primary hover:underline">
-          Guardian hub â†’
+          Guardian hub →
         </Link>
       </div>
       <div className="flex flex-col">
