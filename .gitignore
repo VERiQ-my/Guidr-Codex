@@ -41,7 +41,8 @@ Thumbs.db
 .wrangler/
 
 .firebase-service-account.json
-
+.firebase-admin-credentials.json
+firebase-admin-credentials.json
 # OpenNext and Wrangler local state
 /.open-next/
 /.dev.vars*

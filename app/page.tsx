@@ -8,7 +8,7 @@ import LandingGate from "@/app/components/LandingGate";
 import MarketingLanding from "@/app/components/MarketingLanding";
 
 export const metadata: Metadata = {
-  title: { absolute: "Guidr â€” Check Suspicious Messages, Links & Scams in Malaysia" },
+  title: { absolute: "Guidr — Check Suspicious Messages, Links & Scams in Malaysia" },
   description:
     "Free AI scam checker for Malaysia. Paste a suspicious SMS, WhatsApp message, link or phone number and get a clear answer in seconds. Recognised by NSRC Malaysia.",
   alternates: {
@@ -16,14 +16,14 @@ export const metadata: Metadata = {
     languages: { en: "/", ms: "/ms", "x-default": "/" },
   },
   openGraph: {
-    title: "Guidr â€” Check Suspicious Messages, Links & Scams in Malaysia",
+    title: "Guidr — Check Suspicious Messages, Links & Scams in Malaysia",
     description:
       "Paste a suspicious SMS, WhatsApp message, link or phone number and get a clear answer in seconds. Free, private, built for Malaysia.",
     url: "/",
     locale: "en_MY",
     siteName: "Guidr",
     type: "website",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Guidr â€” scam checker for Malaysia" }],
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Guidr — scam checker for Malaysia" }],
   },
 };
 

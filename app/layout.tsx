@@ -12,8 +12,8 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://guidr.my"),
   title: {
-    default: "Guidr â€” Security Made Simple",
-    template: "%s â€” Guidr",
+    default: "Guidr — Security Made Simple",
+    template: "%s — Guidr",
   },
   description:
     "Investigate suspicious messages, detect scams, and protect yourself from online fraud with Guidr.",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: "Guidr",
     type: "website",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Guidr â€” scam checker for Malaysia" }],
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Guidr — scam checker for Malaysia" }],
   },
   twitter: {
     card: "summary_large_image",
