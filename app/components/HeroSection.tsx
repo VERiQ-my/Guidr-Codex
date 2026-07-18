@@ -4,6 +4,20 @@ import Link from "next/link";
 import { useUser } from "@/app/context/UserContext";
 import { usePrefs } from "@/app/context/PrefsContext";
 
+const cheerfulGreetings = [
+  "Great to see you, {name}!",
+  "Hello, {name}! Let's stay one step ahead today.",
+  "Welcome back, {name}! You've got this.",
+  "Hi, {name}! Here's to a safer day.",
+  "Ready when you are, {name}!",
+];
+
+function greetingFor(name: string) {
+  const day = Math.floor(Date.now() / 86_400_000);
+  const nameValue = Array.from(name).reduce((total, character) => total + character.codePointAt(0)!, 0);
+  return cheerfulGreetings[(day + nameValue) % cheerfulGreetings.length].replace("{name}", name);
+}
+
 export default function HeroSection() {
   const { user } = useUser();
   const { tr } = usePrefs();
@@ -12,7 +26,7 @@ export default function HeroSection() {
   return (
     <section className="px-5 pt-6 pb-4 lg:px-0 lg:pt-10 lg:pb-6 guidr-animate-in guidr-stagger-1">
       <p className="text-sm font-medium text-guidr-primary mb-3">
-        {tr("home.greeting", { name: displayName })}
+        {greetingFor(displayName)}
       </p>
 
       <h2 className="text-2xl lg:text-4xl font-bold text-guidr-text leading-tight mb-6 lg:max-w-3xl">
