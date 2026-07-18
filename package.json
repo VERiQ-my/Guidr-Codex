@@ -7,6 +7,7 @@
                     "build":  "next build --webpack",
                     "start":  "next start",
                     "lint":  "eslint",
+                    "test":  "tsx --test tests/*.test.ts",
                     "preview":  "opennextjs-cloudflare build \u0026\u0026 opennextjs-cloudflare preview",
                     "deploy":  "opennextjs-cloudflare build \u0026\u0026 opennextjs-cloudflare deploy",
                     "cf-typegen":  "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
@@ -30,6 +31,7 @@
                             "eslint":  "^9.0.0",
                             "eslint-config-next":  "16.2.6",
                             "tailwindcss":  "^4.3.0",
-                            "typescript":  "^5.0.0"
+                            "typescript":  "^5.0.0",
+                            "tsx":  "^4.20.0"
                         }
 }

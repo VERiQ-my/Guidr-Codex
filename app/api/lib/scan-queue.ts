@@ -6,8 +6,7 @@ const TICKET_TTL_MS = 5 * 60_000;
 const SLOT_TTL_MS = 2 * 60_000;
 
 function secret() {
-  // OPENAI_API_KEY is server-only and provides a safe default until a dedicated secret is supplied.
-  return process.env.SCAN_QUEUE_SECRET || process.env.OPENAI_API_KEY || "guidr-local-scan-queue";
+  return process.env.SCAN_QUEUE_SECRET || "guidr-local-scan-queue";
 }
 
 function encode(payload: TicketPayload) {
