@@ -3,9 +3,8 @@
 import { logger } from "@/lib/logger";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { collection, query, where, orderBy, onSnapshot } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { useUser } from "@/app/context/UserContext";
+import { subscribeUserCases, type UserCase } from "@/lib/firestore";
 import Header from "@/app/components/Header";
 import BottomNav from "@/app/components/BottomNav";
 import EmailComposerModal from "@/app/components/EmailComposerModal";
@@ -16,26 +15,17 @@ import WardOverview from "@/app/components/WardOverview";
 import ScamCategoryIcon, { categoryColor, displayCategoryName } from "@/app/components/ScamCategoryIcon";
 import { normalizeScamType, SAFE_CATEGORY, formatTrend } from "@/lib/scam-categories";
 
-interface CaseDoc {
-  id: string;
-  verdict: "SCAM" | "SUSPICIOUS" | "LIKELY_SAFE";
-  confidence: string;
-  scamType: string;
-  summary: string;
-  originalMessage: string;
-  manipulationTactics: string[];
-  reportedToNSRC: boolean;
-  createdAt: any;
-  channel?: string;
-}
-
-function caseDate(c: CaseDoc): Date | null {
+function caseDate(c: UserCase): Date | null {
   const t = c.createdAt;
   if (!t) return null;
-  const d = t.toDate ? t.toDate() : new Date(t);
-  return isNaN(d.getTime()) ? null : d;
+  if (typeof t === "object" && t !== null && "toDate" in t && typeof t.toDate === "function") {
+    const d = t.toDate();
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  if (!(typeof t === "number" || typeof t === "string" || t instanceof Date)) return null;
+  const d = new Date(t);
+  return Number.isNaN(d.getTime()) ? null : d;
 }
-
 const PARTNER_CTA_EMAIL = "guidrdeveloper@gmail.com";
 const PARTNER_CTA_SUBJECT = "Guidr Partnership";
 const PARTNER_CTA_BODY =
@@ -50,24 +40,17 @@ const RANGES = [
 ] as const;
 
 export default function AnalyticsPage() {
-  const { user } = useUser();
-  const [cases, setCases] = useState<CaseDoc[]>([]);
+  const { user, loading: userLoading } = useUser();
+  const uid = user?.uid;
+  const [cases, setCases] = useState<UserCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState<(typeof RANGES)[number]["key"]>("Month");
   const [showPartnerPicker, setShowPartnerPicker] = useState(false);
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    if (!user) return;
-
-    const q = query(
-      collection(db, "cases"),
-      where("userId", "==", user.uid),
-      orderBy("createdAt", "desc")
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as CaseDoc));
+    if (userLoading || !uid) return;
+    return subscribeUserCases(uid, (data) => {
       setCases(data);
       setNow(Date.now());
       setLoading(false);
@@ -75,10 +58,7 @@ export default function AnalyticsPage() {
       logger.error("Error fetching user cases:", error);
       setLoading(false);
     });
-
-    return () => unsubscribe();
-  }, [user]);
-
+  }, [uid, userLoading]);
   const days = RANGES.find((r) => r.key === range)!.days;
   const rangeLabel = RANGES.find((r) => r.key === range)!.label;
   const periodMs = days * 86_400_000;
@@ -108,10 +88,10 @@ export default function AnalyticsPage() {
       : Math.round(((current.length - previous.length) / previous.length) * 100);
   const trendUp = current.length >= previous.length;
 
-  const countByCategory = (list: CaseDoc[]) => {
+  const countByCategory = (list: UserCase[]) => {
     const map: Record<string, number> = {};
     list.forEach((c) => {
-      const cat = normalizeScamType(c.scamType);
+      const cat = normalizeScamType(c.scamType || "Other");
       if (cat === SAFE_CATEGORY) return;
       map[cat] = (map[cat] || 0) + 1;
     });

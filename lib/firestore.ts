@@ -6,7 +6,52 @@ import { auth, db } from "./firebase";
 
 function handleListenerError(label: string) { return (err: { code?: string; message?: string }) => { if (err.code !== "permission-denied") logger.error(`[Guidr] ${label} listener error:`, err); }; }
 export interface GlobalStats { totalCases: number; reportedNSRC: number; totalUsers: number; }
-export function subscribeGlobalStats(callback: (stats: GlobalStats) => void): Unsubscribe { return onSnapshot(doc(db, "stats", "global"), (snap) => { const data = snap.exists() ? snap.data() : {}; callback({ totalCases: data.totalCases || 0, reportedNSRC: data.reportedNSRC || 0, totalUsers: data.totalUsers || 0 }); }, handleListenerError("global_stats")); }
+export function subscribeGlobalStats(callback: (stats: GlobalStats) => void, onError?: (error: Error) => void): Unsubscribe {
+  return onSnapshot(doc(db, "stats", "global"), (snap) => {
+    const data = snap.exists() ? snap.data() : {};
+    callback({ totalCases: data.totalCases || 0, reportedNSRC: data.reportedNSRC || 0, totalUsers: data.totalUsers || 0 });
+  }, (error) => {
+    handleListenerError("global_stats")(error);
+    onError?.(error);
+  });
+}
+
+export interface UserCase {
+  id: string;
+  verdict: "SCAM" | "SUSPICIOUS" | "LIKELY_SAFE";
+  confidence?: number | string;
+  scamType?: string;
+  summary?: string;
+  originalMessage?: string;
+  manipulationTactics?: string[];
+  reportedToNSRC?: boolean;
+  createdAt?: unknown;
+  channel?: string;
+}
+
+function caseCreatedAtMillis(value: UserCase["createdAt"]): number {
+  if (typeof value === "object" && value !== null && "toMillis" in value && typeof value.toMillis === "function") return value.toMillis();
+  if (typeof value === "object" && value !== null && "toDate" in value && typeof value.toDate === "function") return value.toDate().getTime();
+  if (typeof value === "number") return value;
+  if (typeof value === "string" || value instanceof Date) {
+    const time = new Date(value).getTime();
+    return Number.isNaN(time) ? 0 : time;
+  }
+  return 0;
+}
+
+/** Listen to one user's cases without requiring a composite Firestore index. */
+export function subscribeUserCases(uid: string, callback: (cases: UserCase[]) => void, onError?: (error: Error) => void): Unsubscribe {
+  return onSnapshot(query(collection(db, "cases"), where("userId", "==", uid)), (snapshot) => {
+    const cases = snapshot.docs
+      .map((entry) => ({ id: entry.id, ...entry.data() }) as UserCase)
+      .sort((left, right) => caseCreatedAtMillis(right.createdAt) - caseCreatedAtMillis(left.createdAt));
+    callback(cases);
+  }, (error) => {
+    handleListenerError("user_cases")(error);
+    onError?.(error);
+  });
+}
 export interface GuardianLink { id?: string; wardUid: string; wardName: string; guardianUid: string; guardianPhone?: string; guardianName?: string; status: "invited" | "pending" | "active" | "declined"; createdAt?: Timestamp; inviteToken?: string; }
 export function subscribeIncomingGuardianRequests(guardianUid: string, callback: (links: GuardianLink[]) => void): Unsubscribe { return onSnapshot(query(collection(db, "guardian_links"), where("guardianUid", "==", guardianUid)), (snap) => callback(snap.docs.map((item) => ({ id: item.id, ...item.data() } as GuardianLink))), handleListenerError("guardian_links")); }
 export interface GuardianEvent { id?: string; wardUid: string; wardName: string; verdict: "SCAM" | "SUSPICIOUS"; confidence: "HIGH" | "MEDIUM" | "LOW"; scamType: string; at: number; read: boolean; }
