@@ -1,7 +1,7 @@
 "use client";
 
 import { logger } from "@/lib/logger";
-import { auth, db } from "@/lib/firebase";
+import { auth, db, isFirebaseConfigured } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { usePathname, useRouter } from "next/navigation";
@@ -42,7 +42,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    // Let the scanner be evaluated locally without Firebase credentials.
+    // Authenticated features remain unavailable until Firebase is configured.
+    if (!isFirebaseConfigured) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
+    let unsubscribe: (() => void) | undefined;
+    try {
+      unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser({
           uid: firebaseUser.uid,
@@ -83,9 +93,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
         }
         setLoading(false);
       }
-    });
+      });
+    } catch (error) {
+      logger.warn("Firebase authentication is unavailable; continuing in local scan-only mode.", error);
+      setUser(null);
+      setLoading(false);
+      return;
+    }
 
-    return () => unsubscribe();
+    return () => unsubscribe?.();
   }, [pathname, router]);
 
   if (loading && !isPublicPath(pathname)) {
