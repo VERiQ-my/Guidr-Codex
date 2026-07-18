@@ -1,0 +1,50 @@
+{
+    "$schema":  "./node_modules/wrangler/config-schema.json",
+    "name":  "guidr-veriq-my",
+    "main":  "./custom-worker.ts",
+    "compatibility_date":  "2026-07-18",
+    "compatibility_flags":  [
+                                "nodejs_compat",
+                                "global_fetch_strictly_public"
+                            ],
+    "workers_dev":  false,
+    "routes":  [
+                   {
+                       "pattern":  "guidr.veriq.my",
+                       "custom_domain":  true
+                   }
+               ],
+    "assets":  {
+                   "directory":  "./.open-next/assets",
+                   "binding":  "ASSETS"
+               },
+    "services":  [
+                     {
+                         "binding":  "WORKER_SELF_REFERENCE",
+                         "service":  "guidr-veriq-my"
+                     }
+                 ],
+    "images":  {
+                   "binding":  "IMAGES"
+               },
+    "observability":  {
+                          "enabled":  true,
+                          "head_sampling_rate":  1
+                      },
+    "durable_objects":  {
+                            "bindings":  [
+                                             {
+                                                 "name":  "SCAN_RUNNER",
+                                                 "class_name":  "ScanRunner"
+                                             }
+                                         ]
+                        },
+    "migrations":  [
+                       {
+                           "tag":  "v1",
+                           "new_sqlite_classes":  [
+                                                      "ScanRunner"
+                                                  ]
+                       }
+                   ]
+}
